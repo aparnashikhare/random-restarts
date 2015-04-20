@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import trials.purple.PurpleSwitchingCenter.Switches;
+import crypto.purple.PurpleSwitchingCenter.Switches;
 
 
 /*Constructs Purple machine with the method constructPurpleMachine and constructor

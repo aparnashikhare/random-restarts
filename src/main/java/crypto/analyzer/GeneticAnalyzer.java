@@ -11,10 +11,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.Random;
-import java.util.Set;
 
-import trials.purple.PurpleExceptionInvalidDimensions;
-import trials.purple.PurpleMachine;
+import crypto.purple.PurpleExceptionInvalidDimensions;
+import crypto.purple.PurpleMachine;
 
 
 public class GeneticAnalyzer {
