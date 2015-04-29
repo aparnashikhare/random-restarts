@@ -15,6 +15,40 @@ import java.util.Set;
 
 public class SelectionAndCrossover {
 	
+    public static List<String> fairRandomSelection(String fitnessScoreFile) throws IOException
+    {
+        int i = 0;
+        
+        List<String> selectedChromosomes = new ArrayList<String>();
+        Properties properties=new Properties();
+        properties.load(new FileInputStream(fitnessScoreFile));
+        
+        double[] scores = new double[properties.size ()]; 
+        for (Object k : properties.keySet ()) {
+            scores[i++] = Double.parseDouble (getScore(properties,""+k));
+        }
+        
+        FairRandomSelector selector = new FairRandomSelector (scores);
+        selectedChromosomes.add (getSwitch(properties, "" + selector.getNextRandom ()));
+        selectedChromosomes.add (getSwitch(properties, "" + selector.getNextRandom ()));
+        
+        return selectedChromosomes;
+    }
+    
+    private static String getSwitch(Properties properties, String key)
+    {
+        String val = properties.getProperty (key);
+        String[] items = val.split(" ");
+        return items[0];
+    }
+
+    private static String getScore(Properties properties, String key)
+    {
+        String val = properties.getProperty (key);
+        String[] items = val.split(" ");
+        return items[1];
+    }
+    
 	public static List<String> randomSelection(String fitnessScoreFile) throws IOException
 	{
 		BufferedReader reader=new BufferedReader(new FileReader(new File(fitnessScoreFile)));

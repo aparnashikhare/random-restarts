@@ -50,7 +50,7 @@ public class FitnessScore {
 			distance+=Integer.parseInt(finalString.charAt(j)+"");
 		}
 		
-		return ((distance*1.0f)/finalString.length())*100;
+		return (( finalString.length() - (distance*1.0f))/finalString.length())*100;
 	}
 	
 	public static String getBinaryString(String text)
