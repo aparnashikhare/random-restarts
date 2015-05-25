@@ -64,7 +64,7 @@ public class FairRandomSelector
     public int getNextRandom()
     {
         int r = current;
-        while (r == current)
+        while (slots[r] == slots[current])
             r = random.nextInt (slots.length);
         
         current = r;
