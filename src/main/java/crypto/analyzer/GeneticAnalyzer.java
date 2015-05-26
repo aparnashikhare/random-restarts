@@ -44,17 +44,18 @@ public class GeneticAnalyzer {
 		generateNewPopulations();
 		
 	}
+
 	private void generateNewPopulations() throws IOException, PurpleExceptionInvalidDimensions
 	{
 		for(int j=0;j<10;j++)
 		{
-		
 			for(int i=0;i<15;i++)
 			{
 				String childSwitch=getChildSwitch();
 				String mutateSwitch=mutateSwitch(childSwitch);
 				writeNewPopulation(mutateSwitch);
 			}
+			
 			findNewPopulationScores();
 		}
 	}
@@ -88,8 +89,11 @@ public class GeneticAnalyzer {
 			count++;
 		}
 		writer.close();
-		
 	}
+	/*
+	 * This method reads the new population and calculates the fitness score for each of the switches .
+	 * The fitness score along with the switch is written to fitnessScore++number.properties file
+	 */
 	private void findNewPopulationScores() throws IOException, PurpleExceptionInvalidDimensions
 	{
 		String originalPlainText =properties.getProperty("genetic.analyzer.plaintext");
@@ -127,7 +131,7 @@ public class GeneticAnalyzer {
 		Random randomNum=new Random();
 		
 		//generates 1-25 (both inclusive)
-		int sixesSwitchPos=randomNum.nextInt(25)+1;
+		int sixesSwitchPos=randomNum.nextInt(25)+1; //25=max-min i.e 26-1
 		int twentiesOnePos=randomNum.nextInt(25)+1;
 		int twentiesTwoPos=randomNum.nextInt(25)+1;
 		int twentiesThreePos=randomNum.nextInt(25)+1;
@@ -150,8 +154,8 @@ public class GeneticAnalyzer {
 
 
 	public static void main(String ...a) throws Exception {
-		GeneticAnalyzer analyzer = new GeneticAnalyzer();
 		
+		GeneticAnalyzer analyzer = new GeneticAnalyzer();
 		analyzer.analyze();
 	}
 }

@@ -1,6 +1,6 @@
 package crypto.analyzer;
 
-import java.util.Arrays;
+
 import java.util.Random;
 
 public class FairRandomSelector
@@ -64,8 +64,15 @@ public class FairRandomSelector
     public int getNextRandom()
     {
         int r = current;
-        while (slots[r] == slots[current])
+        
+        if (current == -1) {
             r = random.nextInt (slots.length);
+        } else {
+        	
+        	// return a random till (slots.length -1)
+            while (slots[r] == slots[current])
+                r = random.nextInt (slots.length);
+        }
         
         current = r;
         return slots[r];

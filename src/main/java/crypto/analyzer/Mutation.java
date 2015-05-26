@@ -6,7 +6,7 @@ public class Mutation {
 	
 	public static String returnMutatedSwitch(String childSwitch)
 	{
-		//[0-24]-[0-24],[0-25],[0-25]-[1-3][1-3][1-3]
+		//[0-25]-[0-25],[0-25],[0-25]-[1-3][1-3][1-3]
 		//System.out.println("ChildSwitch:"+childSwitch);
 		String mutatedSwitch="";
 		String swString[]=SelectionAndCrossover.getSwitches(childSwitch);
@@ -20,7 +20,10 @@ public class Mutation {
 	
 		String valuefromFun="";
 		switch (randValue) {
-		case 0:valuefromFun=mutate(sixes.toCharArray());
+		case 0:valuefromFun=mutate(sixes.toCharArray()); 
+				//return mutated value for example 00110 -> random value 2 then value at index 2 i.e 1 will be replaced by 0 and
+				//it will be 00010
+		
 				while(Integer.parseInt(valuefromFun, 2) >25 || Integer.parseInt(valuefromFun,2) ==0)
 				{
 					valuefromFun=mutate(sixes.toCharArray());
@@ -72,7 +75,7 @@ public class Mutation {
 	public static String mutate(char[] value)
 	{
 		Random random=new Random();
-		int randomBit=random.nextInt(5);
+		int randomBit=random.nextInt(5); //selects randomly 0 to 4
 		
 		value[randomBit]=value[randomBit]=='0' ?'1':'0';
 		return String.valueOf(value);
