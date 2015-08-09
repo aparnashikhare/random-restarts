@@ -8,6 +8,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
+
+import crypto.psuedoPurple.PurpleExceptionInvalidDimensions;
+import crypto.psuedoPurple.PurpleMachine;
 
 public class HMMStarter {
 	
@@ -53,7 +57,7 @@ public class HMMStarter {
 			}
 			
 		}
-		return buffer.toString();
+		return buffer.toString().toUpperCase();
 	}
 	public int getT() throws IOException
 	{
@@ -69,11 +73,97 @@ public class HMMStarter {
 			steps.add(step);
 		}
 	}
-	
-	public void start() throws IOException
+	public String generatePermuation()
+	{
+		Random random=new Random();
+		String arrAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		char[] charArray=arrAlphabet.toCharArray();
+		for(int i=arrAlphabet.length()-1;i>0;i--)
+		{
+			int j=random.nextInt(i+1);//generates a random number from 0 to i (inclusive)
+			char temp=charArray[i];
+			charArray[i]=charArray[j];
+			charArray[j]=temp;
+			
+		}
+		return String.valueOf(charArray);
+	}
+	public void encryptObservations() throws PurpleExceptionInvalidDimensions
+	{
+		String randomKey=generatePermuation();
+		PurpleMachine encryptPM=PurpleMachine.constructPurpleMachine(2, randomKey);
+		String putativeCipherText=encryptPM.purpleEncrypt(plaintext);
+		for(int i=0;i<this.T;i++)
+		{
+			Step step=steps.get(i);
+			step.setOriginalObs(step.getObs());
+			int obsValue=hmap.get(putativeCipherText.charAt(i));
+			step.setObs(obsValue);
+			//steps.add(step);//ask vishu if this is required
+			steps.set(i, step);
+		}
+	}
+	public void start() throws IOException, PurpleExceptionInvalidDimensions
 	{
 		this.plaintext=filterPlaintext();
 		this.T=getT();
+		getObservation();
+		
+		for(int perm=0;perm<numTestCases;perm++)
+		{
+			int maxRestarts=numRestarts;
+			int factor=10;
+			int sizeofScores=0;
+			int temp=maxRestarts;
+			while(temp>0)
+			{
+				sizeofScores++;
+				temp /=factor;
+			}
+			ArrayList<ScoreUnit> scoreUnits=new ArrayList<ScoreUnit>();
+			temp=maxRestarts;
+			for(int i=0;i<sizeofScores;i++)
+			{
+				ScoreUnit score=new ScoreUnit();
+				score.setLoc(0);
+				score.setMaxCount(temp);
+				score.setCurrCount(0);
+				score.setSizeOfArray(maxRestarts/temp);
+				score.setAvg(0.0);
+				double[] scoresArray=new double[score.getSizeOfArray()];
+				for(int j=0;j<score.getSizeOfArray();j++)
+				{
+					scoresArray[j]=0.0;
+				}
+				score.setScores(scoresArray);
+				temp/=factor;
+				scoreUnits.add(score);
+			}
+			int[] randomSeedArray = null;
+			Random random=new Random();
+			for(int rand=0;rand<numRestarts;rand++)
+			{
+				int num;
+				boolean check;
+				do
+				{
+					num=random.nextInt();
+					check=true;
+					
+					for(int j=0;j<rand;j++)
+					{
+						if(num==randomSeedArray[j])
+						{
+							check=false;
+							break;
+						}
+					}
+					
+				}while(!check);
+				randomSeedArray[rand]=num;
+			}//end of for rand< numRestarts
+			encryptObservations();
+		}//end of perm<numofTestCases loop
 	}
 	
 
