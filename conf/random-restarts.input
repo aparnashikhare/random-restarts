@@ -1,0 +1,8 @@
+iterations=10,switches=15
+iterations=25,switches=50
+iterations=50,switches=100
+iterations=100,switches=200
+iterations=200,switches=300
+iterations=300,switches=400
+iterations=400,switches=500
+iterations=500,switches=600

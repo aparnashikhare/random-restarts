@@ -29,7 +29,7 @@ public class SelectionAndCrossover {
         selectedChromosomes.add (getSwitch(properties, "" + selector.getNextRandom ()));
         selectedChromosomes.add (getSwitch(properties, "" + selector.getNextRandom ()));
         
-        System.out.println("selectedChromosomes = " + selectedChromosomes);
+        //System.out.println("selectedChromosomes = " + selectedChromosomes);
         return selectedChromosomes;
     }
     

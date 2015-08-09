@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+
+import crypto.purple.PurpleMachine;
  /*
   * This is the main class of purple machine which reads the plaintext from file,
   * encrypts it using purpleEncrypt method and decrypts the corresponding cipher text 
@@ -16,7 +18,7 @@ import java.util.Scanner;
   */
 public class PurpleMain {
 
-	final static String defaultSwitches="3-20,0,21-12";
+	final static String defaultSwitches="3-7,5,12-12";
 	final static String defaultAlphabetLetters=PurpleMachine.plugboard;
 	
 	final static Map<Character,String> digitsMap=new HashMap<Character, String>();
@@ -89,28 +91,29 @@ public class PurpleMain {
 		PurpleMain purpleMain=new PurpleMain();
 		
 		Scanner scanner=null;
-		//BufferedWriter cipherwriter=null;
+		BufferedWriter cipherwriter=null;
 		BufferedWriter plaintextwriter=null;
 		
 		try {
 			//name of the input plain text file
 			
-			
+			String inputFileName="/Users/vishwa/sjsu/CS297/random-restarts/encdec/plaintext.txt";
 			//name of the file where cipher text is written after encryption
-			String cipherOutputFileName="/Users/vishwa/Documents/workspace/Tutorials/src/Purple/ciphertext1.txt";
+			String cipherOutputFileName="/Users/vishwa/sjsu/CS297/random-restarts/encdec/ciphertext.txt";
 			
 			//name of the file where decrypted text is written after decryption
-			String plaintextOutputFileName="/Users/vishwa/Documents/workspace/Tutorials/src/Purple/putative6.txt";
-			scanner=new Scanner(new File(cipherOutputFileName));
-			
+			String plaintextOutputFileName="/Users/vishwa/sjsu/CS297/random-restarts/encdec/decryptedplaintext.txt";
+			scanner=new Scanner(new File(inputFileName));
+			cipherwriter=new BufferedWriter(new FileWriter(cipherOutputFileName));
 			plaintextwriter=new BufferedWriter(new FileWriter(plaintextOutputFileName));
-			
+			PurpleMachine encryptPM = PurpleMachine.constructPurpleMachine(defaultSwitches, defaultAlphabetLetters);
 			PurpleMachine decryptPM = PurpleMachine.constructPurpleMachine(defaultSwitches, defaultAlphabetLetters);
 			String inputLine="";
 			while(scanner.hasNext())
 			{
 				inputLine=scanner.nextLine();
-				
+				inputLine = encryptPM.purpleEncrypt(purpleMain.correctPlainText(inputLine));
+				cipherwriter.write(inputLine+"\n");
 				inputLine=decryptPM.purpleDecrypt(inputLine);
 				
 				/*System.out.println("*******decrypted text***********");
@@ -135,7 +138,7 @@ public class PurpleMain {
 			{
 				scanner.close();
 				try {
-					//cipherwriter.close();
+					cipherwriter.close();
 					plaintextwriter.close();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
