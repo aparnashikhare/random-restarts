@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +67,7 @@ public class HMMStarter {
 			}
 			
 		}
+		reader.close();
 		return buffer.toString().toUpperCase();
 	}
 	public int getT() throws IOException
@@ -770,7 +772,7 @@ public class HMMStarter {
 						n_key = totalKeyScore / perm;
 						n_data = totalDataScore / perm;
 					}
-
+					
 					//fprintf(fpProgress, "%d\t%d\t%d\t%f\t%d\t%f\t%d\t%f\t%f\n", perm, RESTART_ITER, T, highestSuccessRateBasedOnKey, seedForHighestBasedOnKey, highestSuccessRateBasedOnData, seedForHighestBasedOnData, n_key, n_data);
 					//fflush(fpProgress);
 				}
@@ -786,15 +788,163 @@ public class HMMStarter {
 				}
 				
 			}//end of while random restarts loop
+			
+			System.out.println(alphabet);
+			
+			for(int k=0;k<26;k++)
+			{
+				System.out.print("|");
+			}
+			System.out.println("\n");
+			System.out.println(randomKey);
+			
+			// Information based on key
+			System.out.println("\nHighest Success Rate(Key):"+highestSuccessRateBasedOnKey);
+			System.out.println("\nSeed Used:"+ seedForHighestBasedOnKey);
+			System.out.println("\n\nDecryption mapping(Key):\n");
+			
+			
+			System.out.println(alphabet);
+
+			for(int k=0;k<26;k++)
+			{
+				System.out.print("|");
+			}
+			System.out.println("\n");
+			char[] alphabets=alphabet.toCharArray();
+			for (int k = 0; k < 26; k++)
+			{
+				if (keyFromBForHighestKeyScore[k] == -1)
+				{
+					System.out.print("?");
+				}
+				else
+				{
+					System.out.print(alphabets[keyFromBForHighestKeyScore[k]]);
+				}
+			}
+			
+			// Information based on data
+			System.out.println("\nHighest Success Rate(Data):"+highestSuccessRateBasedOnData);
+			System.out.println("\nSeed Used:"+ seedForHighestBasedOnData);
+			System.out.println("\n\nDecryption mapping(Data):\n");
+
+			System.out.println(alphabet);
 
 			
+
+			for  (int k = 0; k < 26; k++)
+			{
+				System.out.print("|");
+			}
+
+			System.out.println("\n");
+
+			for (int k = 0; k < 26; k++)
+			{
+				if (keyFromBForHighestDataScore[k] == -1)
+				{
+					System.out.print("?");
+				}
+				else
+				{
+					System.out.print(alphabets[keyFromBForHighestDataScore[k]]);
+				}
+			}
+			
+			System.out.println("\n------------------END OF TEST CASE "+perm+1+" of "+numTestCases+", Data Size:"+T);
+
+			totalKeyScore += highestSuccessRateBasedOnKey;
+			totalDataScore += highestSuccessRateBasedOnData;
+
+		
+
+			// Calculate test case specific averages
+
+			for (int i = 0; i < sizeofScores; i++)
+
+			{
+
+				double sum = 0.0;
+
+				ScoreUnit scoreUnit=scoreUnits.get(i);
+				double[] scoreArray=scoreUnit.getScores();
+
+				for (int j = 0; j < scoreUnit.getSizeOfArray(); j++)
+
+				{
+
+					sum += scoreArray[j];
+
+				}
+
+				// Init average
+				scoreUnit.setAvg(sum/scoreUnit.getSizeOfArray());
+		
+				// Print to console
+				System.out.println("Average ("+scoreUnit.getMaxCount()+" restarts)= "+scoreUnit.getAvg());
+				// Write to file
+
+				//fprintf(avgFileHandle, "%d\t%d\t%d\t%d\t%f\n", perm, scoresArray[i].maxCount, maxChars, maxIterForHMM,scoresArray[i].avg);
+
+				//fflush(avgFileHandle);
+
+			}
+
+			// Reset Observations (To be available for the next test case)
+			
+			for (int d = 0; d < T; ++d)
+			{
+				Step step=steps.get(d);
+				step.setObs(step.getOriginalObs());
+			}
+			
 		}//end of perm<numofTestCases loop
+		
+		double normalizedKeyScore = totalKeyScore / (double)numTestCases;
+		double normalizedDataScore = totalDataScore / (double)numTestCases;
+		
+		System.out.println("\nTotal TestCases:"+ numTestCases);
+		System.out.println("\nTotal Score (Key and Data):"+ totalKeyScore+ totalDataScore);
+		System.out.println("\nNormalized Score (Key):"+ normalizedKeyScore);
+		System.out.println("\nNormalized Score (Data):"+ normalizedDataScore);
+		System.out.println("\nIterations for the HMM reestimation function:"+ maxIteartions);
+		System.out.println("\nData Size:"+ T);
+		System.out.println("\nNo. of Restarts:"+ numRestarts);
+		
+		writeScoresToFile(normalizedKeyScore,normalizedDataScore);
+
 	}
 	
 
 
 
 
+	private void writeScoresToFile(double normalizedKeyScore,
+			double normalizedDataScore) throws IOException {
+		// TODO Auto-generated method stub
+		
+		File f = new File(outputFile);
+		if(f.exists() && !f.isDirectory()) { 
+			/* do something */ 
+			BufferedWriter writer=new BufferedWriter(new FileWriter(new File(outputFile)));
+			String header="NumTestCases NumRestarts Data Size MaxIterations KeyScore DataScore\n";
+			String output=numTestCases+"\t\t"+numRestarts+"\t\t"+T+"\t\t"+maxIteartions+"\t\t"+normalizedKeyScore+"\t\t"+normalizedDataScore;
+			writer.write(header+"\n"+output);
+			writer.close();
+			
+		}
+		else
+		{
+			BufferedWriter writer=new BufferedWriter(new FileWriter(new File(outputFile),true));
+			
+			String output=numTestCases+"\t\t"+numRestarts+"\t\t"+T+"\t\t"+maxIteartions+"\t\t"+normalizedKeyScore+"\t\t"+normalizedDataScore;
+			writer.append(output+"\n");
+			writer.close();
+		}
+		
+		
+	}
 	public static void main(String[] args) {
 		
 		if(args.length<6)
