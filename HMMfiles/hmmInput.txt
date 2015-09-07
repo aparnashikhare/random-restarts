@@ -1,0 +1,10 @@
+fname=plaintext.txt,NumIterations=100,NumRestarts=1,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0
+fname=plaintext.txt,NumIterations=100,NumRestarts=100,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0
+fname=plaintext.txt,NumIterations=100,NumRestarts=1000,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0
+fname=plaintext.txt,NumIterations=100,NumRestarts=10000,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0
+fname=plaintext.txt,NumIterations=100,NumRestarts=50000,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0
+fname=plaintext.txt,NumIterations=100,NumRestarts=100000,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0
+fname=plaintext.txt,NumIterations=100,NumRestarts=250000,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0
+fname=plaintext.txt,NumIterations=100,NumRestarts=500000,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0
+fname=plaintext.txt,NumIterations=100,NumRestarts=750000,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0
+fname=plaintext.txt,NumIterations=100,NumRestarts=1000000,TestCases=1,outputFile=scores.txt,keyBasedScoreOnly=0

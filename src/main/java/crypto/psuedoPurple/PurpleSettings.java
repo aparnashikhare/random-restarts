@@ -1,5 +1,7 @@
 package crypto.psuedoPurple;
 
+import java.util.Arrays;
+
 public class PurpleSettings {
 	
 	 final static int[][] variableSwitchPerm={
@@ -92,4 +94,7 @@ public class PurpleSettings {
 			return -1;
 		}
 
+		public static int[][] getVariableSwitchPermutations() {
+			return encryptSwitch;
+		}
 }

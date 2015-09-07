@@ -3,13 +3,17 @@ package crypto.hmm;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import crypto.psuedoPurple.PurpleExceptionInvalidDimensions;
@@ -33,8 +37,9 @@ public class HMMStarter {
 	double EPSILON =0.00001;
 	int startSwitchForPurple=2;
 	boolean debug=false;
-	
+	 DecimalFormat df = new DecimalFormat("#.####");
 	public HashMap<Character,Integer> hmap=new HashMap<Character,Integer>();
+	public HashMap<Integer,Integer> aMatrixHmap=new HashMap<Integer, Integer>();
 	ArrayList<Step> steps=new ArrayList<Step>();
 	
 	
@@ -51,10 +56,13 @@ public class HMMStarter {
 		{
 			hmap.put(alphabet.charAt(i),i);
 		}
+		DiagraphStats ds = new DiagraphStats();
+		ds.initialize();
+		threeA=ds.getA();
 	}
 	public String filterPlaintext() throws IOException
 	{
-		BufferedReader reader=new BufferedReader(new FileReader(new File(fname)));
+		BufferedReader reader=new BufferedReader(new FileReader(new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/"+fname)));
 		
 		int value=0;
 		StringBuffer buffer=new StringBuffer();
@@ -72,21 +80,29 @@ public class HMMStarter {
 	}
 	public int getT() throws IOException
 	{
+		if(debug){
+		System.out.println("plaintext:"+plaintext);
+		System.out.println("plaintext:"+plaintext.length());
+		}
 		return plaintext.length();
 	}
 	public void getObservation()
 	{
+		System.out.println("Inside GetObservations..");
 		for(int i=0;i<plaintext.length();i++)
 		{
 			int obsValue=hmap.get(plaintext.charAt(i));
+			
 			Step step=new Step();
 			step.setObs(obsValue);
+			if(debug)
+				System.out.println(plaintext.charAt(i)+":"+obsValue);
 			steps.add(step);
 		}
 	}
 	public String generatePermuation()
 	{
-		Random random=new Random();
+		Random random=new Random(System.currentTimeMillis());
 		String arrAlphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		char[] charArray=arrAlphabet.toCharArray();
 		for(int i=arrAlphabet.length()-1;i>0;i--)
@@ -102,13 +118,20 @@ public class HMMStarter {
 	public String encryptObservations() throws PurpleExceptionInvalidDimensions
 	{
 		String randomKey=generatePermuation();
-		PurpleMachine encryptPM=PurpleMachine.constructPurpleMachine(2, randomKey);
+		if(debug){
+			System.out.println("Random Key:"+randomKey);
+		}
+		PurpleMachine encryptPM=PurpleMachine.constructPurpleMachine(startSwitchForPurple, randomKey);
 		String putativeCipherText=encryptPM.purpleEncrypt(plaintext);
+		if(debug)
+			System.out.println("PutativeCipherText:"+putativeCipherText);
 		for(int i=0;i<this.T;i++)
 		{
 			Step step=steps.get(i);
 			step.setOriginalObs(step.getObs());
 			int obsValue=hmap.get(putativeCipherText.charAt(i));
+			if(debug)
+				System.out.println(putativeCipherText.charAt(i)+":"+obsValue);
 			step.setObs(obsValue);
 		}
 		return randomKey;
@@ -125,13 +148,13 @@ public class HMMStarter {
 		
 		for(int i = 0; i < N; ++i)
 		{
-			if((random.nextInt() & 0x1) == 0)
+			if((random.nextInt(Integer.MAX_VALUE) & 0x1) == 0)
 		    {
-		        pi[i] = prob + (double)(random.nextInt() & 0x7) / 8.0 * ftemp;
+		        pi[i] = prob + (double)(random.nextInt(Integer.MAX_VALUE) & 0x7) / 8.0 * ftemp;
 		    }
 		    else
 		    {
-		        pi[i] = prob - (double)(random.nextInt()  & 0x7) / 8.0 * ftemp;
+		        pi[i] = prob - (double)(random.nextInt(Integer.MAX_VALUE)  & 0x7) / 8.0 * ftemp;
 		    }
 		    ftemp2 += pi[i];
 		        
@@ -140,6 +163,11 @@ public class HMMStarter {
 	    {
 	        pi[i] /= ftemp2;
 	    }
+		if(debug)
+		{
+			System.out.println("initialize pi matrix....");
+			System.out.println(Arrays.toString(pi));
+		}
 		data.setPi(pi);
 		//initialize B[][]
 		
@@ -151,13 +179,13 @@ public class HMMStarter {
 	        ftemp2 = 0.0;
 	        for(int j = 0; j < M; ++j)
 	        {
-	            if((random.nextInt() & 0x1) == 0)
+	            if((random.nextInt(Integer.MAX_VALUE) & 0x1) == 0)
 	            {
-	                B[i][j] = prob + (double)(random.nextInt() & 0x7) / 8.0 * ftemp;
+	                B[i][j] = prob + (double)(random.nextInt(Integer.MAX_VALUE) & 0x7) / 8.0 * ftemp;
 	            }
 	            else
 	            {
-	                B[i][j] = prob - (double)(random.nextInt() & 0x7) / 8.0 * ftemp;
+	                B[i][j] = prob - (double)(random.nextInt(Integer.MAX_VALUE) & 0x7) / 8.0 * ftemp;
 	            }
 	            ftemp2 += B[i][j];
 	            
@@ -169,20 +197,54 @@ public class HMMStarter {
 	        }
 	        
 	    }// next i
+	    if(debug)
+		{
+			System.out.println("initialize B matrix....");
+			printMatrix(B);
+			
+			
+		}
 	    data.setB(B);
 		
 		
+	}
+	public void printMatrix(double[][] array)
+	{
+		for(double[] rows:array)
+		{
+			for(double elem:rows)
+			{
+				System.out.print(String.format(df.format(elem))+" ");
+			}
+			System.out.println("\n");
+		}
 	}
 	public int getAMatrixRow(int startswitch)
 	{
 		startswitch=(startswitch+1)%25;
 		return startswitch;
 	}
-	public void alphaPass(HMMData data,int startSwitch)
+	public void populateAMatrixHmap(int startswitch)
+	{
+		for(int t=0;t<T;t++)
+		{
+			
+			aMatrixHmap.put(t, startswitch);
+			startswitch=getAMatrixRow(startswitch);
+			//startSwitch=getAMatrixRow(startswitch);
+		}
+		/*System.out.println("\n");
+		for(int t=0;t<T;t++)
+		{
+			System.out.println("Key:"+t+"Value:"+aMatrixHmap.get(t));
+		}*/
+	}
+	public void alphaPass(HMMData data)
 	{
 		double ftemp=0.0;
 		double[] pi=data.getPi();
 		double[][] B=data.getB();
+		
 		
 		//get the step object at zero position
 		Step step0=steps.get(0);
@@ -207,8 +269,13 @@ public class HMMStarter {
 	    for(int t = 1; t < T; ++t)
 	    {
 	        ftemp = 0.0;
-	        int row=getAMatrixRow(startSwitch);
-	        double[][] A = threeA[row];
+	       // startSwitch=getAMatrixRow(startSwitch);
+	        if(debug)
+			{
+				System.out.println("Alpha startSwitch:"+startSwitch);
+			}
+	        int aMatrix=aMatrixHmap.get(t);
+	        double[][] A = threeA[aMatrix];
 	        double[] alphas=new double[N];
 	        for(int i = 0; i < N; ++i)
 	        {
@@ -234,7 +301,7 @@ public class HMMStarter {
 	    
 	    }// next t
 	}
-	public void betaPass(HMMData data,int startSwitch)
+	public void betaPass(HMMData data)
 	{
 		
 		double[][] B=data.getB();
@@ -249,8 +316,14 @@ public class HMMStarter {
 	    // beta pass
 	    for(int t = T - 2; t >= 0; --t)
 	    {
-	    	int row=getAMatrixRow(startSwitch);
-	    	double[][] A = threeA[row];
+	    	//startSwitch=getAMatrixRow(startSwitch);
+	    	 int aMatrix=aMatrixHmap.get(t);
+		     double[][] A = threeA[aMatrix];
+			if(debug)
+			{
+				System.out.println("Beta startSwitch:"+startSwitch);
+			}
+	    	//double[][] A = threeA[startSwitch];
 	    	double[] betas=new double[N];
 	        for(int i = 0; i < N; ++i)
 	        {
@@ -270,12 +343,13 @@ public class HMMStarter {
 	    }// next t
 	}
 	
-	public void computeGammas(HMMData data,int startSwitch)
+	public void computeGammas(HMMData data)
 	{
 		double ftemp;
 		double ftemp2;
 		double denom;
 		double[][] B=data.getB();
+		
 		// compute gamma's and diGamma's
 	    for(int t = 0; t < T - 1; ++t)
 	    {
@@ -284,8 +358,15 @@ public class HMMStarter {
 	        double[] betaCurrentStep=steps.get(t).getBeta();
 	        Step nextStep=steps.get(t+1);
 	        double[] beta=nextStep.getBeta();
-	        int row=getAMatrixRow(startSwitch);
-	        double[][] A = threeA[row];
+	        
+	        int aMatrix=aMatrixHmap.get(t);
+	 	    double[][] A = threeA[aMatrix];
+	   
+	        if(debug)
+			{
+				System.out.println("Gammas startSwitch:"+startSwitch);
+			}
+	        //double[][] A = threeA[startSwitch];
 	        
 	        for(int i = 0; i < N; ++i)
 	        {
@@ -317,6 +398,7 @@ public class HMMStarter {
 	                ftemp += alpha[j] * betaCurrentStep[j];
 	            }
 	            ftemp = (alpha[i] * betaCurrentStep[i]) / ftemp;
+	            //System.out.println("difference:"+DABS(ftemp - gamma[i]));
 	            if(DABS(ftemp - gamma[i]) > EPSILON)
 	            {
 	                System.out.println("gamma["+i+"] = "+gamma[i]+" "+ftemp );
@@ -525,6 +607,8 @@ public class HMMStarter {
 		this.plaintext=filterPlaintext();
 		this.T=getT();
 		getObservation();
+		int startSwitch=startSwitchForPurple-1;
+		populateAMatrixHmap(startSwitch);
 		// Total scores will be stored in this variable, will be used to calculate normalized score
 		double totalDataScore = 0.0;
 		double totalKeyScore = 0.0;
@@ -550,7 +634,7 @@ public class HMMStarter {
 				score.setCurrCount(0);
 				score.setSizeOfArray(maxRestarts/temp);
 				score.setAvg(0.0);
-				double[] scoresArray=new double[score.getSizeOfArray()];
+				double[] scoresArray=new double[score.getSizeOfArray()+1];//changed to score.getSizeOfArray()+1
 				for(int j=0;j<score.getSizeOfArray();j++)
 				{
 					scoresArray[j]=0.0;
@@ -559,15 +643,15 @@ public class HMMStarter {
 				temp/=factor;
 				scoreUnits.add(score);
 			}
-			int[] randomSeedArray = new int[numRestarts];
-			Random random=new Random();
+			int[] randomSeedArray = new int[numRestarts+1];//changed to numRestarts+1
+			Random random=new Random(System.currentTimeMillis());
 			for(int rand=0;rand<numRestarts;rand++)
 			{
 				int num;
 				boolean check;
 				do
 				{
-					num=random.nextInt();
+					num=random.nextInt(Integer.MAX_VALUE);
 					check=true;
 					
 					for(int j=0;j<rand;j++)
@@ -597,7 +681,7 @@ public class HMMStarter {
 			
 			while(restartBeginIter<=restartEndIter) //number of random restarts loop
 			{
-				System.out.println("\nTest case "+perm+1+" of "+numTestCases+" Restart "+restartBeginIter+" of "+restartEndIter);
+				//System.out.println("\nTest case "+perm+1+" of "+numTestCases+" Restart "+restartBeginIter+" of "+restartEndIter);
 				double logProb,newLogProb;
 				int iter;
 				HMMData data=new HMMData();
@@ -612,12 +696,12 @@ public class HMMStarter {
 				while ((iter < maxIteartions) && (newLogProb > logProb))
 				{
 					
-					int startSwitch=startSwitchForPurple-2;
+					//System.out.println("Coming inside the while :"+iter+" newLogProb:"+newLogProb+" logProb:"+logProb);
 					logProb=newLogProb;
 					
-					alphaPass(data,startSwitch);
-					betaPass(data,startSwitch);
-					computeGammas(data,startSwitch);
+					alphaPass(data);
+					betaPass(data);
+					computeGammas(data);
 					reEstimatePi(data);
 					reEstimateB(data);
 					/**????****/
@@ -708,21 +792,25 @@ public class HMMStarter {
 				}
 				System.out.println("\nSuccess Rate (Data):"+ dataScore);
 				System.out.println("\nSuccess Rate (Key):"+ keyScore);
-				System.out.println("\nSeed Used:%d"+ seed);
+				System.out.println("\nSeed Used:"+ seed);
 				System.out.println("\n------------Test Case:"+perm+1+" of "+numTestCases +" , End of Restart: "+restartBeginIter+" of "+restartEndIter+"  Data Size: "+ T);
 
 				// Calculating test case specific scores (will be used later to calculate averages)
+				System.out.println("sizeofscores:"+sizeofScores);
 
 				for (int i = 0; i < sizeofScores; i++)
 
 				{
 					ScoreUnit scoreUnit=scoreUnits.get(i);
 					double[] scores=scoreUnit.getScores();
+					
+					//System.out.println("scoreunit getLoc:"+scoreUnit.getLoc());
+					//System.out.println("scoreunit score:"+Arrays.toString(scores));
 					if(dataScore > scores[scoreUnit.getLoc()])
 					{
 						scores[scoreUnit.getLoc()] = dataScore;
 					}
-					scoreUnit.setScores(scores); //????? required ?
+					//scoreUnit.setScores(scores); //????? required ?
 					scoreUnit.setCurrCount(scoreUnit.getCurrCount()+1);
 					// Counter reached limit. Reset counter and increase location
 
@@ -780,7 +868,7 @@ public class HMMStarter {
 				restartBeginIter++;
 				// This will make sure that the next iteration is not executed
 
-				if (highestSuccessRateBasedOnData >= 1 || highestSuccessRateBasedOnData >= 1.0)
+				if (highestSuccessRateBasedOnKey >= 1.0 || highestSuccessRateBasedOnData >= 1.0)
 				{
 					// The best possible score was computed for this test case.
 					System.out.println("Highest Score found. Breaking out of loop.");
@@ -828,7 +916,7 @@ public class HMMStarter {
 			System.out.println("\nHighest Success Rate(Data):"+highestSuccessRateBasedOnData);
 			System.out.println("\nSeed Used:"+ seedForHighestBasedOnData);
 			System.out.println("\n\nDecryption mapping(Data):\n");
-
+			System.out.println("keyFromBForHighestDataScore[k]"+Arrays.toString(keyFromBForHighestDataScore));
 			System.out.println(alphabet);
 
 			
@@ -905,7 +993,7 @@ public class HMMStarter {
 		double normalizedDataScore = totalDataScore / (double)numTestCases;
 		
 		System.out.println("\nTotal TestCases:"+ numTestCases);
-		System.out.println("\nTotal Score (Key and Data):"+ totalKeyScore+ totalDataScore);
+		System.out.println("\nTotal Score (Key and Data):"+ totalKeyScore+" "+ totalDataScore);
 		System.out.println("\nNormalized Score (Key):"+ normalizedKeyScore);
 		System.out.println("\nNormalized Score (Data):"+ normalizedDataScore);
 		System.out.println("\nIterations for the HMM reestimation function:"+ maxIteartions);
@@ -924,19 +1012,19 @@ public class HMMStarter {
 			double normalizedDataScore) throws IOException {
 		// TODO Auto-generated method stub
 		
-		File f = new File(outputFile);
-		if(f.exists() && !f.isDirectory()) { 
+		File f = new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/"+outputFile);
+		if(!f.exists() && !f.isDirectory()) { 
 			/* do something */ 
-			BufferedWriter writer=new BufferedWriter(new FileWriter(new File(outputFile)));
+			BufferedWriter writer=new BufferedWriter(new FileWriter(new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/"+outputFile)));
 			String header="NumTestCases NumRestarts Data Size MaxIterations KeyScore DataScore\n";
 			String output=numTestCases+"\t\t"+numRestarts+"\t\t"+T+"\t\t"+maxIteartions+"\t\t"+normalizedKeyScore+"\t\t"+normalizedDataScore;
-			writer.write(header+"\n"+output);
+			writer.write(header+"\n"+output+"\n");
 			writer.close();
 			
 		}
 		else
 		{
-			BufferedWriter writer=new BufferedWriter(new FileWriter(new File(outputFile),true));
+			BufferedWriter writer=new BufferedWriter(new FileWriter(new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/"+outputFile),true));
 			
 			String output=numTestCases+"\t\t"+numRestarts+"\t\t"+T+"\t\t"+maxIteartions+"\t\t"+normalizedKeyScore+"\t\t"+normalizedDataScore;
 			writer.append(output+"\n");
@@ -945,11 +1033,11 @@ public class HMMStarter {
 		
 		
 	}
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		
-		if(args.length<6)
+		if(args.length<6 || args==null)
 		{
-			System.out.println("Please enter :");
+			/*System.out.println("Please enter :");
 			System.out.println("filename= fname");
 			System.out.println("max iterations for HMM=maxIterations");
 			System.out.println("number of random restarts=numRestarts");
@@ -957,25 +1045,85 @@ public class HMMStarter {
 			System.out.println("filename to store output scores=outputFile");
 			System.out.println("keybasedScore only=1 else 0");
 			
-			return;
+			return;*/
+			File file=new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/hmmInput.txt");
+			if(file.exists())
+			{
+				List<String> lines=getFileContents(file);
+				for(String line:lines)
+				{
+					System.out.println("Line:"+line);
+					if(line.indexOf(",")>0)
+					{
+						String inputFileKv=line.split(",")[0];
+						String numIterationsKv=line.split(",")[1];
+						String numRestartsKv=line.split(",")[2];
+						String numTestCasesKv=line.split(",")[3];
+						String outputFileKv=line.split(",")[4];
+						String keyBasedScoreOnlyKv=line.split(",")[5];
+						
+						if(inputFileKv.indexOf("=")>0 && numIterationsKv.indexOf("=")>0 && numRestartsKv.indexOf("=")>0 && numTestCasesKv.indexOf("=")>0 && outputFileKv.indexOf("=")>0 && keyBasedScoreOnlyKv.indexOf("=")>0)
+						{
+							String inputFile=inputFileKv.split("=")[1];
+							int numIterations=Integer.parseInt(numIterationsKv.split("=")[1]);
+							int numRestarts=Integer.parseInt(numRestartsKv.split("=")[1]);
+							int numTestCases=Integer.parseInt(numTestCasesKv.split("=")[1]);
+							String outputFile=outputFileKv.split("=")[1];
+							int keyBasedScoreOnly=Integer.parseInt(keyBasedScoreOnlyKv.split("=")[1]);
+							HMMStarter hmmStart=new HMMStarter(inputFile, numIterations, numRestarts, numTestCases, outputFile, keyBasedScoreOnly);
+							
+							hmmStart.start();
+						}
+					}
+				}
+			}
 		}
-		String fname=args[0];
-		int maxIterations=Integer.parseInt(args[1]);
-		int numRestarts=Integer.parseInt(args[2]);
-		int numTestCases=Integer.parseInt(args[3]);
-		String outputFile=args[4];
-		int keyBasedScoreOnly=Integer.parseInt(args[5]);
-		
-		
-		
-		if(numRestarts <=0 || maxIterations<=0 || numTestCases<=0)
-		{
-			return;
+		else if(args.length==6){
+			String fname=args[0];
+			int maxIterations=Integer.parseInt(args[1]);
+			int numRestarts=Integer.parseInt(args[2]);
+			int numTestCases=Integer.parseInt(args[3]);
+			String outputFile=args[4];
+			int keyBasedScoreOnly=Integer.parseInt(args[5]);
+			
+			
+			
+			if(numRestarts <=0 || maxIterations<=0 || numTestCases<=0)
+			{
+				return;
+			}
+			if(keyBasedScoreOnly!=1 && keyBasedScoreOnly !=0)
+			{
+				return;
+			}
+			
+			HMMStarter hmmStart=new HMMStarter(fname, maxIterations, numRestarts, numTestCases, outputFile, keyBasedScoreOnly);
+			
+			hmmStart.start();
 		}
-		if(keyBasedScoreOnly!=1 && keyBasedScoreOnly !=0)
-		{
-			return;
+		
+	}
+	private static List<String> getFileContents(File inf) throws Exception {
+		FileInputStream fs = null;
+		BufferedReader reader = null;
+		List<String> lines = new ArrayList<String>();
+		try {
+			fs = new FileInputStream(inf);
+			reader = new BufferedReader(new InputStreamReader(fs));
+			String line = null; 
+			
+			while( (line = reader.readLine()) != null ) {
+				lines.add(line);
+			}
+			
+		} finally {
+
+			if (reader != null)
+				reader.close();
+			if (fs != null)
+				fs.close();
 		}
 		
+		return lines;
 	}
 }
