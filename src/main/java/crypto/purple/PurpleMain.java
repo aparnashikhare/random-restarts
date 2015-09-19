@@ -18,7 +18,7 @@ import crypto.purple.PurpleMachine;
   */
 public class PurpleMain {
 
-	final static String defaultSwitches="3-7,5,12-12";
+	final static String defaultSwitches="12-6,3,10-31";
 	final static String defaultAlphabetLetters=PurpleMachine.plugboard;
 	
 	final static Map<Character,String> digitsMap=new HashMap<Character, String>();
@@ -97,12 +97,12 @@ public class PurpleMain {
 		try {
 			//name of the input plain text file
 			
-			String inputFileName="/Users/vishwa/sjsu/CS297/random-restarts/encdec/plaintext.txt";
+			String inputFileName="/Users/other/sjsu/random-restarts/encdec/plaintext.txt";
 			//name of the file where cipher text is written after encryption
-			String cipherOutputFileName="/Users/vishwa/sjsu/CS297/random-restarts/encdec/ciphertext.txt";
+			String cipherOutputFileName="/Users/other/sjsu/random-restarts/encdec/ciphertext.txt";
 			
 			//name of the file where decrypted text is written after decryption
-			String plaintextOutputFileName="/Users/vishwa/sjsu/CS297/random-restarts/encdec/decryptedplaintext.txt";
+			String plaintextOutputFileName="/Users/other/sjsu/random-restarts/encdec/decryptedplaintext.txt";
 			scanner=new Scanner(new File(inputFileName));
 			cipherwriter=new BufferedWriter(new FileWriter(cipherOutputFileName));
 			plaintextwriter=new BufferedWriter(new FileWriter(plaintextOutputFileName));

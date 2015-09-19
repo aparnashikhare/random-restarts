@@ -62,7 +62,7 @@ public class HMMStarter {
 	}
 	public String filterPlaintext() throws IOException
 	{
-		BufferedReader reader=new BufferedReader(new FileReader(new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/"+fname)));
+		BufferedReader reader=new BufferedReader(new FileReader(new File("/Users/other/sjsu/random-restarts/HMMfiles/"+fname)));
 		
 		int value=0;
 		StringBuffer buffer=new StringBuffer();
@@ -1012,10 +1012,10 @@ public class HMMStarter {
 			double normalizedDataScore) throws IOException {
 		// TODO Auto-generated method stub
 		
-		File f = new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/"+outputFile);
+		File f = new File("/Users/other/sjsu/random-restarts/HMMfiles/"+outputFile);
 		if(!f.exists() && !f.isDirectory()) { 
 			/* do something */ 
-			BufferedWriter writer=new BufferedWriter(new FileWriter(new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/"+outputFile)));
+			BufferedWriter writer=new BufferedWriter(new FileWriter(new File("/Users/other/sjsu/random-restarts/HMMfiles/"+outputFile)));
 			String header="NumTestCases NumRestarts Data Size MaxIterations KeyScore DataScore\n";
 			String output=numTestCases+"\t\t"+numRestarts+"\t\t"+T+"\t\t"+maxIteartions+"\t\t"+normalizedKeyScore+"\t\t"+normalizedDataScore;
 			writer.write(header+"\n"+output+"\n");
@@ -1024,7 +1024,7 @@ public class HMMStarter {
 		}
 		else
 		{
-			BufferedWriter writer=new BufferedWriter(new FileWriter(new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/"+outputFile),true));
+			BufferedWriter writer=new BufferedWriter(new FileWriter(new File("/Users/other/sjsu/random-restarts/HMMfiles/"+outputFile),true));
 			
 			String output=numTestCases+"\t\t"+numRestarts+"\t\t"+T+"\t\t"+maxIteartions+"\t\t"+normalizedKeyScore+"\t\t"+normalizedDataScore;
 			writer.append(output+"\n");
@@ -1046,7 +1046,7 @@ public class HMMStarter {
 			System.out.println("keybasedScore only=1 else 0");
 			
 			return;*/
-			File file=new File("/Users/vishwa/sjsu/CS297/random-restarts/HMMfiles/hmmInput.txt");
+			File file=new File("/Users/other/sjsu/random-restarts/HMMfiles/hmmInput.txt");
 			if(file.exists())
 			{
 				List<String> lines=getFileContents(file);

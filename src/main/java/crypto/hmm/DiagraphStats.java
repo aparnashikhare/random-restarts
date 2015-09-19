@@ -58,6 +58,7 @@ public class DiagraphStats {
 				for (int l = 0 ; l < 26; l++) {
 					int row = p[k];
 					int col = pPlusOne[l];
+					
 					ADash[l] = diagraphMatrix[row][col];
 				}
 				

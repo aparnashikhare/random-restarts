@@ -21,8 +21,8 @@ import crypto.purple.PurpleMachine;
 
 public class GeneticAnalyzer {
 	
-	private static final String propertiesFile = "/Users/vishwa/sjsu/CS297/random-restarts/conf/geneticanalyzer.properties";
-	private static final String inputFile = "/Users/vishwa/sjsu/CS297/random-restarts/conf/random-restarts.input";
+	private static final String propertiesFile = "/Users/other/sjsu/random-restarts/conf/geneticanalyzer.properties";
+	private static final String inputFile = "/Users/other/sjsu/random-restarts/conf/random-restarts.input";
 	private static int fitnessScoreFileCount;
 	private static int newPopulationFileCount;
 	//private static int fitnessScoreFileCount=0;
@@ -90,6 +90,7 @@ public class GeneticAnalyzer {
 	{
 		for(int j=0;j<this.iterations;j++)
 		{
+			
 			for(int i=0;i<this.switchesPerIteration;i++)
 			{
 				String childSwitch=getChildSwitch();
@@ -98,6 +99,7 @@ public class GeneticAnalyzer {
 			}
 			
 			findNewPopulationScores();
+			System.out.println("End of "+j);
 		}
 	}
 	private void writeNewPopulation(String mutateSwitch) throws IOException {

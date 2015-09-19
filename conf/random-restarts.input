@@ -1,8 +1,5 @@
 iterations=10,switches=10
 iterations=100,switches=100
 iterations=1000,switches=500
+iterations=1200,switches=700
 iterations=10000,switches=1000
-iterations=20000,switches=1500
-iterations=30000,switches=2000
-iterations=40000,switches=3000
-iterations=50000,switches=5000
